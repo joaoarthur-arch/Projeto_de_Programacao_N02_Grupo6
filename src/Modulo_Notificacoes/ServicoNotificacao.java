@@ -1,9 +1,7 @@
-package Modulo_Notificacoes;
+public class NotificacaoService {
 
-import Modulo_Notificacoes.Notificacao;
-import Modulo_Notificacoes.HistoricoNotificacoes;
-import Modulo_Notificacoes.Usuario;
-
-
-public class ServicoNotificacao {
+    public void enviarNotificacao(Usuario usuario, Notificacao notificacao) {
+        usuario.adicionarNotificacao(notificacao);
+        // Lógica adicional de envio (ex: popup na interface) pode ser adicionada aqui.
+    }
 }
