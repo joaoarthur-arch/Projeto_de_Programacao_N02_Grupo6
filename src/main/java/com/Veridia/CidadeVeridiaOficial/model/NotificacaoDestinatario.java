@@ -1,103 +1,93 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
-import java.nio.channels.Channel;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity (name = "NotificacaoDestinatario")
-@Table (name = "notificacoes_para_destinatario")
+@Entity
+@Table(name = "notificacoes_para_destinatario")
 public class NotificacaoDestinatario {
+
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    private Notificacao notificacao;
-    private Usuario destinatario;
-    private Channel channel;
-    private boolean encaminhada, lida;
-    private Instant encaminhada_em, lida_em, criada_em;
-    private int tentativas;
 
-    public Notificacao getNotificacao() {
-        return notificacao;
-    }
+    // FK notification_id -> notificacao.id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "notification_id")
+    private Notificacao notification;
 
-    public void setNotificacao(Notificacao notificacao) {
-        this.notificacao = notificacao;
-    }
+    // FK recipient_id -> usuarios.id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipient_id")
+    private Usuario recipient;
 
-    public UUID getId() {
-        return id;
-    }
+    // channel CHECK ('EM_APP','EMAIL') -> mapeamos como enum
+    @Enumerated(EnumType.STRING)
+    @Column(name = "channel", nullable = false)
+    private DeliveryChannel channel;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    @Column(name = "delivered", nullable = false)
+    private boolean delivered = false;
 
-    public Usuario getDestinatario() {
-        return destinatario;
-    }
+    @Column(name = "delivered_at")
+    private Instant deliveredAt;
 
-    public void setDestinatario(Usuario destinatario) {
-        this.destinatario = destinatario;
-    }
+    @Column(name = "read", nullable = false)
+    private boolean read = false;
 
-    public boolean isEncaminhada() {
-        return encaminhada;
-    }
+    @Column(name = "read_at")
+    private Instant readAt;
 
-    public void setEncaminhada(boolean encaminhada) {
-        this.encaminhada = encaminhada;
-    }
+    @Column(name = "attempts", nullable = false)
+    private Integer attempts = 0;
 
-    public boolean isLida() {
-        return lida;
-    }
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-    public void setLida(boolean lida) {
-        this.lida = lida;
-    }
+    public enum DeliveryChannel { EM_APP, EMAIL }
 
-    public Channel getChannel() {
-        return channel;
-    }
+    public NotificacaoDestinatario() { }
 
-    public void setChannel(Channel channel) {
-        this.channel = channel;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public Instant getEncaminhada_em() {
-        return encaminhada_em;
-    }
+    public Notificacao getNotification() { return notification; }
+    public void setNotification(Notificacao notification) { this.notification = notification; }
 
-    public void setEncaminhada_em(Instant encaminhada_em) {
-        this.encaminhada_em = encaminhada_em;
-    }
+    public Usuario getRecipient() { return recipient; }
+    public void setRecipient(Usuario recipient) { this.recipient = recipient; }
 
-    public Instant getLida_em() {
-        return lida_em;
-    }
+    public DeliveryChannel getChannel() { return channel; }
+    public void setChannel(DeliveryChannel channel) { this.channel = channel; }
 
-    public void setLida_em(Instant lida_em) {
-        this.lida_em = lida_em;
-    }
+    public boolean isDelivered() { return delivered; }
+    public void setDelivered(boolean delivered) { this.delivered = delivered; }
 
-    public Instant getCriada_em() {
-        return criada_em;
-    }
+    public Instant getDeliveredAt() { return deliveredAt; }
+    public void setDeliveredAt(Instant deliveredAt) { this.deliveredAt = deliveredAt; }
 
-    public void setCriada_em(Instant criada_em) {
-        this.criada_em = criada_em;
-    }
+    public boolean isRead() { return read; }
+    public void setRead(boolean read) { this.read = read; }
 
-    public int getTentativas() {
-        return tentativas;
-    }
+    public Instant getReadAt() { return readAt; }
+    public void setReadAt(Instant readAt) { this.readAt = readAt; }
 
-    public void setTentativas(int tentativas) {
-        this.tentativas = tentativas;
+    public Integer getAttempts() { return attempts; }
+    public void setAttempts(Integer attempts) { this.attempts = attempts; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) this.id = UUID.randomUUID();
+        if (this.createdAt == null) this.createdAt = Instant.now();
+        if (this.attempts == null) this.attempts = 0;
+        if (this.channel == null) this.channel = DeliveryChannel.EM_APP;
     }
 }

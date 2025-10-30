@@ -1,40 +1,35 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
-
-@Entity (name = "NotificacaoTipoEvento")
-@Table (name = "notificacao_tipo_evento")
+@Entity
+@Table(name = "notificacao_tipo_evento")
 public class NotificacaoTipoEvento {
+
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    private String codigo, descricao;
 
-    public UUID getId() {
-        return id;
-    }
+    // code text NOT NULL UNIQUE
+    @Column(name = "code", nullable = false, unique = true)
+    private String code;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    @Column(name = "description")
+    private String description;
 
-    public String getCodigo() {
-        return codigo;
-    }
+    public NotificacaoTipoEvento() { }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public String getDescricao() {
-        return descricao;
-    }
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

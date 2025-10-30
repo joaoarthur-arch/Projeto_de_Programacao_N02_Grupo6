@@ -1,49 +1,49 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity (name = "Curso")
-@Table (name = "cursos")
+@Entity
+@Table(name = "cursos")
 public class Curso {
+
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    private String nome, codigo;
+
+    // corresponde à coluna "name" no banco
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    // corresponde à coluna "code" no banco
+    @Column(name = "code", unique = true)
+    private String code;
+
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    public UUID getId() {
-        return id;
-    }
+    public Curso() { }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
 
-    public String getCodigo() {
-        return codigo;
-    }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) this.id = UUID.randomUUID();
+        if (this.createdAt == null) this.createdAt = Instant.now();
     }
 }

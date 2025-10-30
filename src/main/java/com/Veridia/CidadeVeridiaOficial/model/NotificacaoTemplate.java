@@ -1,69 +1,62 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
-import java.nio.channels.Channel;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
-@Entity (name = "NotificacaoTemplate")
-@Table (name = "notificacao_template")
+@Entity
+@Table(name = "notificacao_template")
 public class NotificacaoTemplate {
+
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    private String nome, conteudo, corpo;
-    private List<Channel> channel;
-    private Instant criado_em;
-    private enum Channel{EM_APP, EMAIL};
 
-    public UUID getId() {
-        return id;
-    }
+    // no schema: column name = name (UNIQUE)
+    @Column(name = "name", nullable = false, unique = true)
+    private String name;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    @Column(name = "subject")
+    private String subject;
 
-    public String getNome() {
-        return nome;
-    }
+    @Column(name = "body", columnDefinition = "text", nullable = false)
+    private String body;
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    // channel is text[] with default ['EM_APP']
+    @Column(name = "channel", columnDefinition = "text[]")
+    private String[] channel;
 
-    public String getConteudo() {
-        return conteudo;
-    }
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-    public void setConteudo(String conteudo) {
-        this.conteudo = conteudo;
-    }
+    public NotificacaoTemplate() { }
 
-    public List<Channel> getChannel() {
-        return channel;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public void setChannel(List<Channel> channel) {
-        this.channel = channel;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public Instant getCriado_em() {
-        return criado_em;
-    }
+    public String getSubject() { return subject; }
+    public void setSubject(String subject) { this.subject = subject; }
 
-    public void setCriado_em(Instant criado_em) {
-        this.criado_em = criado_em;
-    }
+    public String getBody() { return body; }
+    public void setBody(String body) { this.body = body; }
 
-    public String getCorpo() {
-        return corpo;
-    }
+    public String[] getChannel() { return channel; }
+    public void setChannel(String[] channel) { this.channel = channel; }
 
-    public void setCorpo(String corpo) {
-        this.corpo = corpo;
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) this.id = UUID.randomUUID();
+        if (this.createdAt == null) this.createdAt = Instant.now();
+        if (this.channel == null) this.channel = new String[] { "EM_APP" };
     }
 }

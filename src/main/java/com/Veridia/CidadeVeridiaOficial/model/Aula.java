@@ -1,82 +1,77 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.Instant;
 import java.util.UUID;
-@Entity (name = "Aula")
-@Table (name = "aulas")
+
+@Entity
+@Table(name = "aulas")
 public class Aula {
+
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
+
+    // FK para cursos(id)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "curso_id")
     private Curso curso;
-    private Usuario instrutor;
-    private String nome_aula,sala;
-    private Instant startAt, endAt, createdAT;
 
-    public Instant getStartAt() {
-        return startAt;
-    }
+    // FK para usuarios(id) -> nota: coluna se chama instructor_id no seu schema
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instructor_id")
+    private Usuario instructor;
 
-    public void setStartAt(Instant startAt) {
-        this.startAt = startAt;
-    }
+    // corresponde à coluna "title"
+    @Column(name = "title")
+    private String title;
 
-    public Curso getCurso() {
-        return curso;
-    }
+    @Column(name = "start_at", nullable = false)
+    private Instant startAt;
 
-    public void setCurso(Curso curso) {
-        this.curso = curso;
-    }
+    @Column(name = "end_at")
+    private Instant endAt;
 
-    public UUID getId() {
-        return id;
-    }
+    // corresponde à coluna "room"
+    @Column(name = "room")
+    private String room;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-    public Usuario getInstrutor() {
-        return instrutor;
-    }
+    public Aula() { }
 
-    public void setInstrutor(Usuario instrutor) {
-        this.instrutor = instrutor;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public String getNome_aula() {
-        return nome_aula;
-    }
+    public Curso getCurso() { return curso; }
+    public void setCurso(Curso curso) { this.curso = curso; }
 
-    public void setNome_aula(String nome_aula) {
-        this.nome_aula = nome_aula;
-    }
+    public Usuario getInstructor() { return instructor; }
+    public void setInstructor(Usuario instructor) { this.instructor = instructor; }
 
-    public String getSala() {
-        return sala;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public void setSala(String sala) {
-        this.sala = sala;
-    }
+    public Instant getStartAt() { return startAt; }
+    public void setStartAt(Instant startAt) { this.startAt = startAt; }
 
-    public Instant getEndAt() {
-        return endAt;
-    }
+    public Instant getEndAt() { return endAt; }
+    public void setEndAt(Instant endAt) { this.endAt = endAt; }
 
-    public void setEndAt(Instant endAt) {
-        this.endAt = endAt;
-    }
+    public String getRoom() { return room; }
+    public void setRoom(String room) { this.room = room; }
 
-    public Instant getCreatedAT() {
-        return createdAT;
-    }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
-    public void setCreatedAT(Instant createdAT) {
-        this.createdAT = createdAT;
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) this.id = UUID.randomUUID();
+        if (this.createdAt == null) this.createdAt = Instant.now();
     }
 }

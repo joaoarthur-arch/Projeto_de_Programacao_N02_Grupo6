@@ -1,61 +1,60 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity (name = "Pagamento")
-@Table (name = "pagamentos")
+@Entity
+@Table(name = "pagamentos")
 public class Pagamento {
+
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
+
+    // FK matriculas(id)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "matricula_id")
     private Matricula matricula;
-    private BigDecimal quantia;
+
+    // coluna amount (numeric)
+    @Column(name = "amount", nullable = false)
+    private BigDecimal amount;
+
+    // status default 'Pendente', CHECK (Pendente,Aprovado,Falha)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private PagamentoStatus status;
-    private Instant pago_em;
-    private enum PagamentoStatus{PENDENTE, APROVADO, FALHA};
 
-    public UUID getId() {
-        return id;
-    }
+    @Column(name = "paid_at")
+    private Instant paidAt;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    public enum PagamentoStatus { Pendente, Aprovado, Falha }
 
-    public Instant getPago_em() {
-        return pago_em;
-    }
+    public Pagamento() { }
 
-    public void setPago_em(Instant pago_em) {
-        this.pago_em = pago_em;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public BigDecimal getQuantia() {
-        return quantia;
-    }
+    public Matricula getMatricula() { return matricula; }
+    public void setMatricula(Matricula matricula) { this.matricula = matricula; }
 
-    public void setQuantia(BigDecimal quantia) {
-        this.quantia = quantia;
-    }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public Matricula getMatricula() {
-        return matricula;
-    }
+    public PagamentoStatus getStatus() { return status; }
+    public void setStatus(PagamentoStatus status) { this.status = status; }
 
-    public void setMatricula(Matricula matricula) {
-        this.matricula = matricula;
-    }
+    public Instant getPaidAt() { return paidAt; }
+    public void setPaidAt(Instant paidAt) { this.paidAt = paidAt; }
 
-    public PagamentoStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(PagamentoStatus status) {
-        this.status = status;
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) this.id = UUID.randomUUID();
     }
 }

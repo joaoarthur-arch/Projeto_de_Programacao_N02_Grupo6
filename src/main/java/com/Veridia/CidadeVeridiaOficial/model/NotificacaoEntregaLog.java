@@ -1,60 +1,56 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity (name = "NotificacaoEntregaLog")
-@Table (name = "notificacoes_entregues")
+@Entity
+@Table(name = "notificacoes_entregues")
 public class NotificacaoEntregaLog {
+
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    private NotificacaoDestinatario destinatario;
-    private Instant tentativa_de;
-    private DeliveryStatus status;
-    private String erro;
-    private enum DeliveryStatus{SUCESSO, FALHA};
 
-    public UUID getId() {
-        return id;
-    }
+    // FK notification_recipient_id -> notificacoes_para_destinatario.id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "notification_recipient_id")
+    private NotificacaoDestinatario notificationRecipient;
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+    @Column(name = "attempt_at", nullable = false)
+    private Instant attemptAt;
 
-    public NotificacaoDestinatario getDestinatario() {
-        return destinatario;
-    }
+    // status CHECK ('SUCCESS','FAILED')
+    @Column(name = "status", nullable = false)
+    private String status;
 
-    public void setDestinatario(NotificacaoDestinatario destinatario) {
-        this.destinatario = destinatario;
-    }
+    @Column(name = "error")
+    private String error;
 
-    public DeliveryStatus getStatus() {
-        return status;
-    }
+    public NotificacaoEntregaLog() { }
 
-    public void setStatus(DeliveryStatus status) {
-        this.status = status;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public String getErro() {
-        return erro;
-    }
+    public NotificacaoDestinatario getNotificationRecipient() { return notificationRecipient; }
+    public void setNotificationRecipient(NotificacaoDestinatario notificationRecipient) { this.notificationRecipient = notificationRecipient; }
 
-    public void setErro(String erro) {
-        this.erro = erro;
-    }
+    public Instant getAttemptAt() { return attemptAt; }
+    public void setAttemptAt(Instant attemptAt) { this.attemptAt = attemptAt; }
 
-    public Instant getTentativa_de() {
-        return tentativa_de;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setTentativa_de(Instant tentativa_de) {
-        this.tentativa_de = tentativa_de;
+    public String getError() { return error; }
+    public void setError(String error) { this.error = error; }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) this.id = UUID.randomUUID();
+        if (this.attemptAt == null) this.attemptAt = Instant.now();
     }
 }
