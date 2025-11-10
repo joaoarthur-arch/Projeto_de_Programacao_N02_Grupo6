@@ -1,100 +1,81 @@
 package com.Veridia.CidadeVeridiaOficial.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
-
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "notificacao") // nota: sua tabela é singular
+@Table(name = "notificacao")
 public class Notificacao {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    // FK notificacao_tipo_evento(id)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_type_id")
-    private NotificacaoTipoEvento eventType;
+    @Column(nullable = false)
+    private String titulo;
 
-    // FK notificacao_template(id)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id")
-    private NotificacaoTemplate template;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String mensagem;
 
-    @Column(name = "title")
-    private String title;
+    @Column(nullable = false, length = 50)
+    private String tipo; // NOVA_AULA, CANCELAMENTO, PAGAMENTO, AVALIACAO, MENSAGEM
 
-    @Column(name = "message", columnDefinition = "text", nullable = false)
-    private String message;
+    @Column(length = 20)
+    private String prioridade = "MEDIA"; // URGENTE, MEDIA, BAIXA
 
-    // jsonb -> mapeado como String; se quiser JsonNode/Map, usar hibernate-types
-    @Column(name = "data", columnDefinition = "jsonb")
-    private String data;
+    @Column(name = "usuario_id", nullable = false)
+    private UUID usuarioId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "priority", nullable = false)
-    private Prioridade priority;
+    @Column(nullable = false)
+    private Boolean lido = false;
 
-    // FK usuarios(id)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origin_user_id")
-    private Usuario originUser;
+    @Column(name = "data_envio")
+    private Instant dataEnvio;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    @Column(name = "data_leitura")
+    private Instant dataLeitura;
 
-    @Column(name = "send_at")
-    private Instant sendAt;
+    @PrePersist
+    public void prePersist() {
+        if (this.dataEnvio == null) {
+            this.dataEnvio = Instant.now();
+        }
+    }
 
-    @Column(name = "cancelled", nullable = false)
-    private boolean cancelled = false;
+    public Notificacao() {}
 
-    public enum Prioridade { URGENTE, MEDIA, BAIXA }
-
-    public Notificacao() { }
+    public Notificacao(String titulo, String mensagem, String tipo, UUID usuarioId) {
+        this.titulo = titulo;
+        this.mensagem = mensagem;
+        this.tipo = tipo;
+        this.usuarioId = usuarioId;
+    }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public NotificacaoTipoEvento getEventType() { return eventType; }
-    public void setEventType(NotificacaoTipoEvento eventType) { this.eventType = eventType; }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
-    public NotificacaoTemplate getTemplate() { return template; }
-    public void setTemplate(NotificacaoTemplate template) { this.template = template; }
+    public String getMensagem() { return mensagem; }
+    public void setMensagem(String mensagem) { this.mensagem = mensagem; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTipo() { return tipo; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+    public String getPrioridade() { return prioridade; }
+    public void setPrioridade(String prioridade) { this.prioridade = prioridade; }
 
-    public String getData() { return data; }
-    public void setData(String data) { this.data = data; }
+    public UUID getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(UUID usuarioId) { this.usuarioId = usuarioId; }
 
-    public Prioridade getPriority() { return priority; }
-    public void setPriority(Prioridade priority) { this.priority = priority; }
+    public Boolean getLido() { return lido; }
+    public void setLido(Boolean lido) { this.lido = lido; }
 
-    public Usuario getOriginUser() { return originUser; }
-    public void setOriginUser(Usuario originUser) { this.originUser = originUser; }
+    public Instant getDataEnvio() { return dataEnvio; }
+    public void setDataEnvio(Instant dataEnvio) { this.dataEnvio = dataEnvio; }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-
-    public Instant getSendAt() { return sendAt; }
-    public void setSendAt(Instant sendAt) { this.sendAt = sendAt; }
-
-    public boolean isCancelled() { return cancelled; }
-    public void setCancelled(boolean cancelled) { this.cancelled = cancelled; }
-
-    @PrePersist
-    public void prePersist() {
-        if (this.id == null) this.id = UUID.randomUUID();
-        if (this.createdAt == null) this.createdAt = Instant.now();
-        if (this.priority == null) this.priority = Prioridade.MEDIA;
-    }
+    public Instant getDataLeitura() { return dataLeitura; }
+    public void setDataLeitura(Instant dataLeitura) { this.dataLeitura = dataLeitura; }
 }
